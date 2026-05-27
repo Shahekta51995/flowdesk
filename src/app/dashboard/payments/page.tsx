@@ -1,18 +1,21 @@
 "use client";
 
 import Header from "@/components/ui/Header";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Clock, CheckCircle, XCircle, AlertCircle,
   RefreshCw, ArrowRight, Zap, Shield,
-  Database, TrendingUp
+  Database, TrendingUp,
+  Loader2
 } from "lucide-react";
 
 // --- Types ---
 type PaymentStatus = "INITIATED" | "PROCESSING" | "CAPTURED" | "SETTLED" | "FAILED" | "REFUNDED";
 
 interface Payment {
+  _id?: string;
   id: string;
+   paymentId?: string;
   orderId: string;
   client: string;
   amount: number;
@@ -155,11 +158,46 @@ const formatAmount = (paise: number) =>
 export default function PaymentsPage() {
   const [selectedPayment, setSelectedPayment] = useState<Payment>(mockPayments[0]);
   const [activeTab, setActiveTab] = useState<"payments" | "ledger" | "webhooks">("payments");
+const [apiPayments, setApiPayments] = useState<any[]>([]);
+const [apiLoading, setApiLoading] = useState(true);
+ const [isLive, setIsLive] = useState(false);
+
+  const fetchPayments = useCallback(async () => {
+    setApiLoading(true);
+    try {
+      const res  = await fetch("/api/payments");
+      const json = await res.json();
+      if (json.success && json.data.length > 0) {
+        // Normalize API data to match our interface
+        const normalized: Payment[] = json.data.map((p: any) => ({
+          ...p,
+          id: p.paymentId || p._id,
+          webhookEvents: (p.webhookEvents || []).map((e: any) => ({
+            event:     e.event,
+            timestamp: new Date(e.timestamp).toLocaleTimeString("en-IN"),
+            status:    e.status,
+            payload:   e.payload,
+          })),
+          createdAt: new Date(p.createdAt).toLocaleString("en-IN"),
+          updatedAt: new Date(p.updatedAt).toLocaleString("en-IN"),
+        }));
+        setApiPayments(normalized);
+        setSelectedPayment(normalized[0]);
+        setIsLive(true);
+      }
+    } catch (err) {
+      console.error("API failed, using mock data:", err);
+    } finally {
+      setApiLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchPayments(); }, [fetchPayments]);
 
   const stats = [
-    { label: "Total Collected", value: formatAmount(mockPayments.filter(p => ["SETTLED", "CAPTURED"].includes(p.status)).reduce((a, p) => a + p.amount, 0)), color: "#10b981", icon: TrendingUp },
-    { label: "Processing", value: mockPayments.filter(p => p.status === "PROCESSING").length.toString(), color: "#f59e0b", icon: RefreshCw },
-    { label: "Failed Today", value: mockPayments.filter(p => p.status === "FAILED").length.toString(), color: "#ef4444", icon: XCircle },
+    { label: "Total Collected", value: formatAmount(apiPayments.filter(p => ["SETTLED", "CAPTURED"].includes(p.status)).reduce((a, p) => a + p.amount, 0)), color: "#10b981", icon: TrendingUp },
+    { label: "Processing", value: apiPayments.filter(p => p.status === "PROCESSING").length.toString(), color: "#f59e0b", icon: RefreshCw },
+    { label: "Failed Today", value: apiPayments.filter(p => p.status === "FAILED").length.toString(), color: "#ef4444", icon: XCircle },
     { label: "Success Rate", value: "94.2%", color: "#6366f1", icon: Shield },
   ];
 
@@ -330,8 +368,25 @@ export default function PaymentsPage() {
               </button>
             ))}
           </div>
+         
+          </div>
 
           {/* Payments Tab */}
+
+           {apiLoading ? (
+            <div style={{
+              padding: "64px", display: "flex",
+              alignItems: "center", justifyContent: "center", gap: "12px"
+            }}>
+              <Loader2 size={20} color="#6366f1"
+                style={{ animation: "spin 1s linear infinite" }} />
+              <span style={{ color: "#8b8fa8", fontSize: "14px" }}>
+                Fetching from MongoDB...
+              </span>
+              <style>{`@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }`}</style>
+            </div>
+          ) : (
+            <>
           {activeTab === "payments" && (
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -588,7 +643,8 @@ export default function PaymentsPage() {
               </table>
             </div>
           )}
-        </div>
+          </>)}
+        
 
       </div>
     </div>
