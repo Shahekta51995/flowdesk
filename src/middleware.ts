@@ -1,23 +1,30 @@
-import { auth } from "@/lib/auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export default auth((req) => {
-  const isLoggedIn   = !!req.auth;
-  const isDashboard  = req.nextUrl.pathname.startsWith("/dashboard");
-  const isLoginPage  = req.nextUrl.pathname.startsWith("/login");
+export function middleware(req: NextRequest) {
+  const session     = req.cookies.get("flowdesk_session")?.value;
+  const isLoggedIn  = !!session;
+  const path        = req.nextUrl.pathname;
 
-  // Redirect to login if not authenticated
-  if (isDashboard && !isLoggedIn) {
+  const isDashboard = path.startsWith("/dashboard");
+  const isApp       = path.startsWith("/app");
+  const isLoginPage = path === "/login";
+
+  if ((isDashboard || isApp) && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Redirect to dashboard if already logged in
   if (isLoginPage && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    try {
+      const userData = JSON.parse(session!);
+      const dest     = userData.user?.isAdmin ? "/dashboard" : "/app";
+      return NextResponse.redirect(new URL(dest, req.url));
+    } catch {
+      return NextResponse.next();
+    }
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

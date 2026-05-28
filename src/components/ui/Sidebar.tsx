@@ -2,28 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BarChart3, CreditCard,
-  Users, Settings, Zap, Bell, LogOut
+  Users, Settings, Zap, Bell, LogOut,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Overview",   href: "/dashboard",            icon: LayoutDashboard },
-  { label: "Analytics",  href: "/dashboard/analytics",  icon: BarChart3       },
-  { label: "Payments",   href: "/dashboard/payments",   icon: CreditCard      },
-  { label: "Customers",  href: "/dashboard/customers",  icon: Users           },
-  { label: "Settings",   href: "/dashboard/settings",   icon: Settings        },
+  { label: "Overview",  href: "/dashboard",           icon: LayoutDashboard },
+  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3       },
+  { label: "Payments",  href: "/dashboard/payments",  icon: CreditCard      },
+  { label: "Customers", href: "/dashboard/customers", icon: Users           },
+  { label: "Settings",  href: "/dashboard/settings",  icon: Settings        },
 ];
 
 export default function Sidebar() {
-  const pathname        = usePathname();
-  const { data: session } = useSession();
+  const pathname = usePathname();
+  const [userData, setUserData] = useState<any>(null);
 
-  const userName  = session?.user?.name  || "User";
-  const userEmail = session?.user?.email || "";
-  const isAdmin   = session?.user?.isAdmin;
-  const initials  = userName.split(" ").map((n: string) => n[0]).join("").toUpperCase().slice(0, 2);
+  useEffect(() => {
+    // Read from cookie
+    const cookies = document.cookie.split(";");
+    const sessionCookie = cookies
+      .find(c => c.trim().startsWith("flowdesk_session="));
+    if (sessionCookie) {
+      try {
+        const value   = decodeURIComponent(sessionCookie.split("=")[1]);
+        const session = JSON.parse(value);
+        setUserData(session.user);
+      } catch {}
+    }
+  }, []);
+
+  const userName  = userData?.name     || "User";
+  const userEmail = userData?.email    || "";
+  const isAdmin   = userData?.isAdmin  || false;
+  const initials  = userName
+    .split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   return (
     <aside style={{
@@ -37,8 +56,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div style={{
         display: "flex", alignItems: "center", gap: "12px",
-        padding: "20px 24px",
-        borderBottom: "1px solid #2a2d3e"
+        padding: "20px 24px", borderBottom: "1px solid #2a2d3e"
       }}>
         <div style={{
           width: "32px", height: "32px", borderRadius: "8px",
@@ -63,7 +81,7 @@ export default function Sidebar() {
           fontSize: "11px", padding: "3px 10px",
           borderRadius: "20px", fontWeight: 600,
           backgroundColor: isAdmin ? "#6366f120" : "#10b98120",
-          color: isAdmin ? "#6366f1" : "#10b981",
+          color:           isAdmin ? "#6366f1"   : "#10b981",
           border: `1px solid ${isAdmin ? "#6366f130" : "#10b98130"}`
         }}>
           {isAdmin ? "● Admin" : "● User"}
@@ -85,7 +103,7 @@ export default function Sidebar() {
               fontSize: "14px", fontWeight: 500,
               textDecoration: "none",
               backgroundColor: isActive ? "#6366f1" : "transparent",
-              color: isActive ? "#ffffff" : "#8b8fa8",
+              color:           isActive ? "#ffffff" : "#8b8fa8",
               transition: "all 0.15s ease",
             }}>
               <Icon size={18} />
@@ -108,39 +126,49 @@ export default function Sidebar() {
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "12px", fontWeight: 700, color: "#ffffff", flexShrink: 0
           }}>
-            {initials}
+            {initials || "U"}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ fontSize: "13px", fontWeight: 600, color: "#ffffff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{
+              fontSize: "13px", fontWeight: 600, color: "#ffffff",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+            }}>
               {userName}
             </p>
-            <p style={{ fontSize: "11px", color: "#8b8fa8", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <p style={{
+              fontSize: "11px", color: "#8b8fa8",
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
+            }}>
               {userEmail}
             </p>
           </div>
           <Bell size={15} color="#8b8fa8" />
         </div>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/login";
+          }}
           style={{
             width: "100%", padding: "9px 12px",
             borderRadius: "8px", border: "1px solid #2a2d3e",
             backgroundColor: "transparent",
             display: "flex", alignItems: "center", gap: "8px",
-            cursor: "pointer", color: "#8b8fa8", fontSize: "13px",
-            fontWeight: 500, transition: "all 0.15s ease"
+            cursor: "pointer", color: "#8b8fa8",
+            fontSize: "13px", fontWeight: 500,
+            transition: "all 0.15s ease"
           }}
           onMouseOver={e => {
             e.currentTarget.style.backgroundColor = "#ef444420";
-            e.currentTarget.style.borderColor = "#ef444440";
-            e.currentTarget.style.color = "#ef4444";
+            e.currentTarget.style.borderColor     = "#ef444440";
+            e.currentTarget.style.color           = "#ef4444";
           }}
           onMouseOut={e => {
             e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.borderColor = "#2a2d3e";
-            e.currentTarget.style.color = "#8b8fa8";
+            e.currentTarget.style.borderColor     = "#2a2d3e";
+            e.currentTarget.style.color           = "#8b8fa8";
           }}
         >
           <LogOut size={15} />
