@@ -6,18 +6,35 @@ export function middleware(req: NextRequest) {
   const path        = req.nextUrl.pathname;
 
   const isDashboard = path.startsWith("/dashboard");
-  const isApp       = path.startsWith("/app");
+  const isUserApp   = path.startsWith("/app");
   const isLoginPage = path === "/login";
 
-  if ((isDashboard || isApp) && !isLoggedIn) {
+  // Not logged in → redirect to login
+  if ((isDashboard || isUserApp) && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (isLoginPage && isLoggedIn) {
+  if (isLoggedIn) {
     try {
       const userData = JSON.parse(session!);
-      const dest     = userData.user?.isAdmin ? "/dashboard" : "/app";
-      return NextResponse.redirect(new URL(dest, req.url));
+      const isAdmin  = userData.user?.isAdmin;
+
+      // Admin trying to access user pages → redirect to dashboard
+      if (isUserApp && isAdmin) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
+
+      // User trying to access admin pages → redirect to /app
+      if (isDashboard && !isAdmin) {
+        return NextResponse.redirect(new URL("/app", req.url));
+      }
+
+      // Already logged in and on login page → redirect to correct home
+      if (isLoginPage) {
+        return NextResponse.redirect(
+          new URL(isAdmin ? "/dashboard" : "/app", req.url)
+        );
+      }
     } catch {
       return NextResponse.next();
     }
