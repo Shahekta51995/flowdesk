@@ -441,7 +441,6 @@ export default function PayPage() {
                 marginBottom: "8px", display: "block",
                 textTransform: "uppercase", letterSpacing: "0.05em"
               }}>
-                <Smartphone size={11} style={{ marginRight: "4px" }} />
                 UPI ID (optional — prefill)
               </label>
               <input
