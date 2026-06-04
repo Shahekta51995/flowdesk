@@ -484,7 +484,7 @@ React · Next.js · TypeScript · React Native ·
 StarRocks · Apache Superset · Keycloak ·
 Node.js · MongoDB · MySQL · Redis · Razorpay
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-ekta-shah-356ab9283?style=flat&logo=linkedin)](https://linkedin.com/in/ekta-shah-356ab9283)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Ekta%20Shah-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/ekta-shah-356ab9283)
 [![GitHub](https://img.shields.io/badge/GitHub-Shahekta51995-181717?style=flat&logo=github)](https://github.com/Shahekta51995)
 
 ---
