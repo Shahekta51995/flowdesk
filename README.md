@@ -364,7 +364,7 @@ docker run -d --name starrocks \
   -p 8030:8030 -p 9030:9030 \
   starrocks/allin1-ubuntu
 
-#Superset
+# Superset
 docker compose -f docker-compose-image-tag.yml up
 ```
 
@@ -484,7 +484,7 @@ React · Next.js · TypeScript · React Native ·
 StarRocks · Apache Superset · Keycloak ·
 Node.js · MongoDB · MySQL · Redis · Razorpay
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-ekta-shah-356ab9283-0077B5?style=flat&logo=linkedin)](https://linkedin.com/in/ekta-shah-356ab9283)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-ekta-shah-356ab9283?style=flat&logo=linkedin)](https://linkedin.com/in/ekta-shah-356ab9283)
 [![GitHub](https://img.shields.io/badge/GitHub-Shahekta51995-181717?style=flat&logo=github)](https://github.com/Shahekta51995)
 
 ---
