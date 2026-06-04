@@ -1,11 +1,11 @@
 "use client";
 
 import Header from "@/components/ui/Header";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
-  Search, Filter, Download, ChevronLeft,
+  Search, Download, ChevronLeft,
   ChevronRight, ChevronUp, ChevronDown,
-  Building2, Mail, Phone, TrendingUp,
+  Building2,  TrendingUp,
   Users, UserCheck, UserX, ArrowUpDown,
   Loader2
 } from "lucide-react";
@@ -355,7 +355,7 @@ export default function CustomersPage() {
                           <td style={{ padding: "14px 16px" }}>
                             <input type="checkbox"
                               checked={isSelected}
-                              onChange={() => toggleSelect(customer._id)}
+                              onChange={() => toggleSelect(customer.id)}
                               style={{ cursor: "pointer", accentColor: "#6366f1" }}
                             />
                           </td>
