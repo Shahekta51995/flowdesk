@@ -1,0 +1,60 @@
+{
+  "realm" : "flowdesk",
+  "users" : [ {
+    "id" : "8272a9cf-899d-404e-97ec-a8d2c1347a4a",
+    "username" : "ektaadmin",
+    "firstName" : "Ekta",
+    "lastName" : "Shah",
+    "email" : "ekta.admin@flowdesk.com",
+    "emailVerified" : true,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "de84ea58-e3ca-4924-8300-850b2e96c05f",
+      "type" : "password",
+      "createdDate" : 1780740012709,
+      "secretData" : "{\"value\":\"gDW9B9x3qJdTOi2hSBscnz6IhDonZgX/q0V0yOFlLYuylR3gIjCC2lQyREa7rv4TsU4FFUJEwvj8zyotBQG/IA==\",\"salt\":\"LjGThzENJFDSdyVLS0AK0w==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "admin", "default-roles-flowdesk" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "2be2a249-2586-48a7-ba44-a45b51a5c049",
+    "username" : "ektauser",
+    "firstName" : "Ekta",
+    "lastName" : "User",
+    "email" : "ekta.user@flowdesk.com",
+    "emailVerified" : true,
+    "enabled" : true,
+    "totp" : false,
+    "credentials" : [ {
+      "id" : "94f4a1f2-0d63-43fa-9a11-5adaa2da8353",
+      "type" : "password",
+      "createdDate" : 1780740013572,
+      "secretData" : "{\"value\":\"YhjPrtCx9rqE1L8kL3tCgmpE1u9DIfJSUlgmT/NdH7NJ84aBpRG43+zPpQ5HsyIpvLZAin2S24rLsjSD9ygeUg==\",\"salt\":\"vTySx44EUSfOtYxMFMKO0A==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "user", "default-roles-flowdesk" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
+    "id" : "8101d383-f0df-4e66-b828-b5d6bf54ffda",
+    "username" : "service-account-flowdesk-try",
+    "emailVerified" : false,
+    "createdTimestamp" : 1780740014874,
+    "enabled" : true,
+    "totp" : false,
+    "serviceAccountClientId" : "flowdesk-try",
+    "credentials" : [ ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-flowdesk" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  } ]
+}

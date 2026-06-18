@@ -1,28 +1,35 @@
 import mysql from "mysql2/promise";
 
-let connection: mysql.Connection | null = null;
+// ✅ Use a pool instead of a single connection (more stable)
+const pool = mysql.createPool({
+  host:     process.env.STARROCKS_HOST     || "localhost",
+  port:     Number(process.env.STARROCKS_PORT) || 9030,
+  user:     process.env.STARROCKS_USERNAME || "root",
+  password: process.env.STARROCKS_PASSWORD || "",
+  database: process.env.STARROCKS_DATABASE || "flowdesk",
 
-export async function connectStarRocks() {
-  if (connection) return connection;
+  // ✅ Critical — disables prepared statement protocol
+  namedPlaceholders: false,
 
-  connection = await mysql.createConnection({
-    host:     "127.0.0.1",
-    port:     9030,
-    user:     "root",
-    password: "",
-    database: "flowdesk",
-  });
+  waitForConnections: true,
+  connectionLimit:    10,
+  queueLimit:         0,
+});
 
-  return connection;
-}
-
-export async function queryStarRocks(sql: string): Promise<{
-  rows: any[];
+export async function queryStarRocks(sql: string, params: any[] = []): Promise<{
+  rows:   any[];
   timeMs: number;
 }> {
-  const conn  = await connectStarRocks();
   const start = Date.now();
-  const [rows] = await conn.execute(sql);
+
+  // ✅ Use pool.query() NOT pool.execute()
+  // execute() uses prepared statements → breaks in StarRocks
+  // query()   uses text protocol       → works fine
+  const [rows] = await pool.query(sql, params);
+
   const timeMs = Date.now() - start;
   return { rows: rows as any[], timeMs };
 }
+
+// Optional: export pool if you ever need raw access
+export { pool };

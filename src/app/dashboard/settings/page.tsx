@@ -34,6 +34,7 @@ export default function SettingsPage() {
     setError("");
     try {
       const res  = await fetch("/api/settings/profile");
+      console.log("Res",res)
       const json = await res.json();
 
       if (json.success) {

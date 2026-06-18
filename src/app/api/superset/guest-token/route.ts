@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const SUPERSET_URL   = process.env.SUPERSET_URL            || "http://localhost:8088";
+const SUPERSET_URL   = process.env.SUPERSET_URL|| "http://localhost:8089";
 const ADMIN_USERNAME = process.env.SUPERSET_ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD = process.env.SUPERSET_ADMIN_PASSWORD || "admin";
 const EMBED_UUID     = process.env.SUPERSET_EMBED_UUID     || "";
@@ -88,10 +88,10 @@ async function getGuestToken(accessToken: string, csrfToken: string | null) {
 
 export async function GET(req: NextRequest) {
   try {
-    const sessionCookie = req.cookies.get("flowdesk_session")?.value;
-    if (!sessionCookie) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    // const sessionCookie = req.cookies.get("flowdesk_session")?.value;
+    // if (!sessionCookie) {
+    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // }
 
     // Step 1 — Login
     const { accessToken } = await getSupersetTokens();
@@ -105,9 +105,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ success: true, token: guestToken });
 
   } catch (error: any) {
-    console.error("Superset token error:", error.message);
+    console.error("Superset token error:", error.message,error.cause);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error.message,cause: String(error.cause)  },
       { status: 500 }
     );
   }

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const KEYCLOAK_BASE = "http://localhost:8080";
-const REALM        = "flowdesk";
-const ADMIN_CLIENT = "flowdesk-try";
-const ADMIN_SECRET = "uQMm0J3MG3DTpOEH7Mn7dRCZrAva372y";
+const KEYCLOAK_BASE = process.env.KEYCLOAK_INTERNAL_URL || process.env.KEYCLOAK_URL!;
+const REALM         = process.env.KEYCLOAK_REALM || "flowdesk";
+const ADMIN_CLIENT  = process.env.KEYCLOAK_ID!;
+const ADMIN_SECRET  = process.env.KEYCLOAK_CLIENT_SECRET!;
 
-// Get admin token from Keycloak
+// Get admin token from Keycloak using client credentials
 async function getAdminToken() {
   const params = new URLSearchParams({
     client_id:     ADMIN_CLIENT,
@@ -22,7 +22,11 @@ async function getAdminToken() {
     }
   );
 
-  if (!res.ok) return null;
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("Admin token error:", err);
+    return null;
+  }
   const data = await res.json();
   return data.access_token;
 }
@@ -31,31 +35,48 @@ async function getAdminToken() {
 export async function GET(req: NextRequest) {
   try {
     const sessionCookie = req.cookies.get("flowdesk_session")?.value;
+    console.log("sessionCookie exists:", !!sessionCookie);
+
     if (!sessionCookie) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const session = JSON.parse(sessionCookie);
-    const userId  = session.user?.id;
+    const session   = JSON.parse(sessionCookie);
+    const userId    = session.user?.id;
+    const userToken = session.accessToken;
+
+    console.log("userId:", userId);
 
     if (!userId) {
       return NextResponse.json({ error: "User ID not found" }, { status: 400 });
     }
 
-    const adminToken = await getAdminToken();
-    if (!adminToken) {
-      return NextResponse.json(
-        { error: "Could not get admin token" },
-        { status: 500 }
+    // Try with user's own access token first
+    let userRes = await fetch(
+      `${KEYCLOAK_BASE}/admin/realms/${REALM}/users/${userId}`,
+      { headers: { Authorization: `Bearer ${userToken}` } }
+    );
+
+    // If user token doesn't have admin rights, fall back to client credentials
+    if (!userRes.ok) {
+      console.log("User token failed, trying admin token...");
+      const adminToken = await getAdminToken();
+      if (!adminToken) {
+        return NextResponse.json(
+          { error: "Could not get admin token" },
+          { status: 500 }
+        );
+      }
+
+      userRes = await fetch(
+        `${KEYCLOAK_BASE}/admin/realms/${REALM}/users/${userId}`,
+        { headers: { Authorization: `Bearer ${adminToken}` } }
       );
     }
 
-    const userRes = await fetch(
-      `${KEYCLOAK_BASE}/admin/realms/${REALM}/users/${userId}`,
-      { headers: { Authorization: `Bearer ${adminToken}` } }
-    );
-
     if (!userRes.ok) {
+      const errText = await userRes.text();
+      console.error("Keycloak user fetch failed:", userRes.status, errText);
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
@@ -63,6 +84,7 @@ export async function GET(req: NextRequest) {
     }
 
     const user = await userRes.json();
+    console.log("Fetched user:", user.username);
 
     return NextResponse.json({
       success: true,
@@ -79,6 +101,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error: any) {
+    console.error("Settings GET error:", error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
@@ -121,13 +144,13 @@ export async function PUT(req: NextRequest) {
 
     if (!updateRes.ok) {
       const errText = await updateRes.text();
+      console.error("Keycloak update failed:", errText);
       return NextResponse.json(
         { error: `Keycloak update failed: ${errText}` },
         { status: 400 }
       );
     }
 
-    // Update the session cookie with new name
     const newName    = `${firstName} ${lastName}`.trim();
     const newSession = {
       ...session,
@@ -146,6 +169,7 @@ export async function PUT(req: NextRequest) {
     return response;
 
   } catch (error: any) {
+    console.error("Settings PUT error:", error);
     return NextResponse.json(
       { error: error.message },
       { status: 500 }
