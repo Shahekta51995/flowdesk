@@ -964,7 +964,7 @@ export default function AnalyticsPage() {
               marginBottom: "6px",
             }}
           >
-            Revenue Trend — 2024
+            Revenue Trend — 2025
           </h3>
           <p
             style={{ color: "#8b8fa8", fontSize: "12px", marginBottom: "20px" }}

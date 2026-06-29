@@ -17,7 +17,7 @@
 > real-time OLAP analytics, UPI payment processing, embedded BI dashboards,
 > and enterprise IAM — built end-to-end as a full-stack data product showcase.
 
-**[🚀 Live Demo](https://flowdesk.vercel.app)** · **[📸 Screenshots](#-screenshots)** · **[🏗️ Architecture](#-architecture)**
+**[📸 Screenshots](#-screenshots)** · **[🏗️ Architecture](#-architecture)**
 
 </div>
 
@@ -476,7 +476,7 @@ Storing as integers (paise) guarantees exact arithmetic.
 
 ## 👩‍💻 About the Developer
 
-Built by **Ekta Shah** — Senior Software Engineer with 6 years of experience
+Built by **Ekta Shah** — Application Engineer with 6 years of experience
 specializing in enterprise data products and FinTech payment systems.
 
 **Core expertise:**
